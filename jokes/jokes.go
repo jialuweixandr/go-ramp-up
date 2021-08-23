@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"errors"
 )
  
 
@@ -39,14 +40,19 @@ func (c *Cache) checkVisited(id int) bool {
 }
 
 
+// TODO: make errors consistent
 // call the joke api and return
 func GetARandomJoke(ch chan JokeResult, joke_type string) {
+	if joke_type != "programming" && joke_type != "general" {
+		//fmt.Println("Bad joke type! Shold be programming or general")
+		ch <- JokeResult{Error: errors.New("Bad joke type! Shold be programming or general")}
+	}
+
 	// return value
 	var jkres JokeResult = JokeResult{}
 
 	// build url with query
 	//query := "general"
-	// TODO: put an error check for "type"
 	path := fmt.Sprintf("https://official-joke-api.appspot.com/jokes/%s/random", joke_type)
 	//fmt.Println("path: ", path)
 
@@ -74,25 +80,37 @@ func GetARandomJoke(ch chan JokeResult, joke_type string) {
 	// json parsing
 	var jkres_arr []JokeResult
 	json.Unmarshal(responseData, &jkres_arr)
+	if len(jkres_arr) == 0 {
+		ch <- JokeResult{Error: errors.New("bad array length 0")}
+		os.Exit(1)
+	}
 
 	// put result struct into the channel - the asynchronous way of returning(?)
 	ch <- jkres_arr[0]
 }
 
+// TODO: figure out what to do with joke_type.. maybe make it into an array?
 // get n non-repeating jokes, concurrently
-func GetRandomJokes(ch chan JokeResult, n int, joke_type string) []JokeResult{
-	// TODO: figure out what to do with joke_type.. maybe make it into an array?
-	
+func GetRandomJokes(num_jokes int, joke_type string) ([]JokeResult, error){
+	// parameters error checking
+	if joke_type != "programming" && joke_type != "general" {
+		return nil, errors.New("Bad joke type! Shold be programming or general")
+	}
+	if num_jokes < 0 {
+		return nil, errors.New("Invalid num_jokes value!")
+	}
+
+	// create a channel
+	ch := make(chan JokeResult, num_jokes)
+	// return value
+	jkres_list := make([]JokeResult, num_jokes)
 	// thread-safe dict
 	cache := Cache{dict: make(map[int]bool)}
 
-	// return value
-	jkres_list := make([]JokeResult, n)
-
-	// breaks only when gathered n non-repeaing jokes. A better way to write this?
+	// asynchrounously call GetARandomJoke. n non-repeaing jokes. A better way to write this?
 	cnt := 0
 	for {
-		if cnt == n {
+		if cnt == num_jokes {
 			break
 		}
 
@@ -116,5 +134,5 @@ func GetRandomJokes(ch chan JokeResult, n int, joke_type string) []JokeResult{
 			cnt += 1
 		}
 	}
-	return jkres_list
+	return jkres_list, nil
 }
