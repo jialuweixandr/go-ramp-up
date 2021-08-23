@@ -1,4 +1,4 @@
-package main
+package jokes
 
 import (
 	"encoding/json"
@@ -33,7 +33,7 @@ func (c *Cache) checkVisited(id int) bool {
 	return true
 }
 
-func getARandomJoke(ch chan Response) {
+func GetARandomJoke(ch chan Response) {
 	response, err := http.Get("https://official-joke-api.appspot.com/random_joke")
 
 	if err != nil {
@@ -52,59 +52,29 @@ func getARandomJoke(ch chan Response) {
 	ch <- responseObject
 }
 
-// input: take number n from command line
-// output: a list of n jokes: Setup and punchline (format tbd)
-func main() {
 
-	var n int
-	fmt.Print("Enter a number: ")
-	_, err := fmt.Scanf("%d", &n)
-	fmt.Println("Generating ", n, " jokes...")
-	fmt.Println("------")
-
-	if err != nil {
-		fmt.Print(err.Error())
-		os.Exit(1)
-	}
-
-	jokes := make([]Response, n)
-
-	ch := make(chan Response, n)
+func GetRandomJokes(ch chan Response, n int) []Response{
 	cache := Cache{dict: make(map[int]bool)}
-
+	jokes := make([]Response, n)
 	cnt := 0
 	for {
-		go getARandomJoke(ch)
+		go GetARandomJoke(ch)
 
 		if cnt == n {
 			break
 		}
 
-		res := <-ch
+		joke := <-ch
 
-		if cache.checkVisited((res.Id)) {
+		if cache.checkVisited((joke.Id)) {
 			fmt.Println("old joke... fetching you a new one")
 		} else {
-			jokes[cnt] = res
+			jokes[cnt] = joke
 			fmt.Println((cnt))
 			fmt.Println("	Setup: ", jokes[cnt].Setup)
 			fmt.Println("	Punchline: ", jokes[cnt].Punchline)
 			cnt += 1
 		}
 	}
-
-	// for i := 0; i < n; i++ {
-	// 	go getARandomJoke(ch)
-
-	// 	res := <-ch
-	// 	if cache.checkVisited((res.Id)) {
-	// 		fmt.Printf("old joke....")
-	// 		continue
-	// 	}
-	// 	jokes[i] = res
-
-	// 	fmt.Println(i + 1)
-	// 	fmt.Println("	Setup: ", jokes[i].Setup)
-	// 	fmt.Println("	Punchline: ", jokes[i].Punchline)
-	// }
+	return jokes
 }
