@@ -21,14 +21,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	ch := make(chan jokes.JokeResult, n)
+	
 
 	// jokes.GetARandomJoke(ch, "programming")
 	// res := <- ch
 	// fmt.Println(res)
 
 
-	jokes := jokes.GetRandomJokes(ch, n, "programming")
+	jokes, err := jokes.GetRandomJokes(n, "programming")
 	fmt.Println(jokes)
 
 
