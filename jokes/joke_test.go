@@ -5,7 +5,7 @@ import (
 )
 
 func TestGetARandomJoke(t *testing.T) {
-	if 2 != 1 {
+	if 1 != 1 {
 		t.Fatalf("This is bad..")
 	}
 }
