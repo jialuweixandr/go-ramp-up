@@ -2,6 +2,7 @@ package jokes
 
 import (
 	"testing"
+	"fmt"
 )
 
 func TestGetARandomJokeType(t *testing.T) {
@@ -52,8 +53,10 @@ func TestGetRandomJokesBad(t *testing.T) {
 	num_jokes := -1
 
 	var _, error = GetRandomJokes(num_jokes, joke_type)
+	fmt.Println("test04: ", error)
 
-	if error == nil{
+
+	if error == nil {
 		t.Fatalf("Expect error. Actual: No error.")
 	}
 }
