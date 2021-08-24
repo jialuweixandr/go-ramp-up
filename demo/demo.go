@@ -22,16 +22,16 @@ func main() {
 	}
 
 	
-	//api := jokes.JokeResultSite1{}
-	// todo: change this into an array
+	// api := jokes.JokeResultSite2{}
+	// // todo: change this into an array
 
 	// ch := make(chan jokes.JokeResult)
-	// go api.GetARandomJoke(ch, "programming")
+	// go api.GetARandomJoke(ch, "Christmas")
 	// res := <- ch
 	// fmt.Println(res)
 
 
-	jokes, err := GetRandomJokes(n, "programming")
+	jokes, err := GetRandomJokes(n, "Pun")
 	if err != nil {
 		fmt.Print(err.Error())
 		os.Exit(1)
@@ -45,29 +45,18 @@ func main() {
 // TODO!!!!: add a router function in the jokes module to determine which api to call....
 // get n non-repeating jokes, concurrently
 func GetRandomJokes(num_jokes int, joke_type string) ([]jokes.JokeResult, error){
-	// parameters error checking 
-	if joke_type != "programming" && joke_type != "general" {
-		return nil, errors.New("Bad joke type! Shold be programming or general")
+	// error checking 
+	if joke_type != "programming" && joke_type != "general" && joke_type != "Pun" && joke_type != "Christmas" && joke_type != "Spooky"{
+		return nil, errors.New("Bad joke type! Joke type should be one of followwing: programming, general, Christmas, Pun, Spooky")
 	}
 	if num_jokes < 0 {
 		return nil, errors.New("Invalid num_jokes value!")
 	}
 
-	// create a channel
 	ch := make(chan jokes.JokeResult, num_jokes)
-	// return value
-	jkres_list := make([]jokes.JokeResult, num_jokes)
-
-
-
-	// thread-safe dict
-	// TODO: change this!!! Don't expose internal structure
-	// cache := Cache{dict: make(map[int]bool)}
-	c := cache.NewCache()
-
-
-	// TODO:change this! 
-	api := jokes.JokeResultSite1{}
+	c := cache.NewCache() // tracks existing ids
+	jkres_list := make([]jokes.JokeResult, num_jokes) // return value
+	api := jokes.JokeRouter(joke_type) // find correct struct to call based on joke_type
 
 
 	// asynchrounously call GetARandomJoke. n non-repeaing jokes. A better way to write this?
@@ -77,7 +66,6 @@ func GetRandomJokes(num_jokes int, joke_type string) ([]jokes.JokeResult, error)
 			break
 		}
 
-		// call go routine and error check
 		go api.GetARandomJoke(ch, joke_type)
 		jkres := <-ch
 		if jkres.Geterror() != nil {
@@ -85,7 +73,7 @@ func GetRandomJokes(num_jokes int, joke_type string) ([]jokes.JokeResult, error)
 			os.Exit(1)
 		}
 
-		// check duplicate. increment only when it's a new joke
+		// check duplicate
 		if c.CheckVisited((jkres.Getid())) {
 			fmt.Println("old joke... fetching you a new one")
 			continue

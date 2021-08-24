@@ -16,7 +16,6 @@ func NewCache() Cache {
 }
 
 
-// check if id is in map
 func (c *Cache) CheckVisited(id int) bool {
 	c.mux.Lock()
 	defer c.mux.Unlock()
