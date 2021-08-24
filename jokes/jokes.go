@@ -9,12 +9,11 @@ import (
 	"errors"
 )
 
-
+///////////////////////////////////////////////////////////////
 // generic interface and struct for both sides - an abstraction
 type JokeAPI interface {
 	GetARandomJoke(ch chan JokeResult, joke_type string)
 }
-
 
 type JokeResult struct {
 	id int
@@ -23,7 +22,6 @@ type JokeResult struct {
 	punchline string
 	error error
 }
-
 
 func (jkres JokeResult) Getid () int {
 	return jkres.id
@@ -34,24 +32,28 @@ func (jkres JokeResult) Geterror () error {
 }
 
 
-// JSON result from site 1
+//////////////////////////////////////////////////////////////
+// determines which api to call
+func JokeRouter(joke_type string) JokeAPI {
+	if joke_type == "programming" || joke_type == "general" {
+		return JokeResultSite1{}
+	} else if joke_type == "Pun" || joke_type == "Spooky" || joke_type == "Christmas" {
+		return JokeResultSite2{}
+	} else {
+		return nil // TODO: fix this
+	}
+}
+
+
+
+//////////////////////////////////////////////////////////////
+// JSON structure and function for joke api 1
 type JokeResultSite1 struct {
 	Id        int    `json:"id"`
 	Type      string `json:"type"`
 	Setup     string `json:"setup"`
 	Punchline string `json:"punchline"`
 }
-
-
-// JSON result from site 2
-type JokeResultSite2 struct {
-	Category string `json:"category"`
-	Id 		int `json:"id"`
-	Setup     string `json:"setup"`
-	Delivery string `json:"delivery"`
-}
-
-
 
 // call joke api 1 and return
 func (jr1 JokeResultSite1) GetARandomJoke(ch chan JokeResult, joke_type string) {
@@ -96,6 +98,15 @@ func (jr1 JokeResultSite1) GetARandomJoke(ch chan JokeResult, joke_type string) 
 }
 
 
+/////////////////////////////////////////////////////////////////
+//JSON structure and function for joke api 2
+type JokeResultSite2 struct {
+	Category string `json:"category"`
+	Id 		int `json:"id"`
+	Setup     string `json:"setup"`
+	Delivery string `json:"delivery"`
+}
+
 // call joke api 2 and return
 func (jr2 JokeResultSite2) GetARandomJoke(ch chan JokeResult, joke_type string) {
 	// error checking 
@@ -133,16 +144,4 @@ func (jr2 JokeResultSite2) GetARandomJoke(ch chan JokeResult, joke_type string) 
 
 	// put result into channel
 	ch <- jkres
-}
-
-
-
-func JokeRouter(joke_type string) JokeAPI {
-	if joke_type == "programming" || joke_type == "general" {
-		return JokeResultSite1{}
-	} else if joke_type == "Pun" || joke_type == "Spooky" || joke_type == "Christmas" {
-		return JokeResultSite2{}
-	} else {
-		return nil // TODO: fix this
-	}
 }

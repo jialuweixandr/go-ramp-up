@@ -12,10 +12,30 @@ import (
 // output: a list of n jokes: Setup and punchline (format tbd)
 func main() {
 
-	var n int
-	fmt.Print("Enter a number: ")
-	_, err := fmt.Scanf("%d", &n)
-	fmt.Println("Generating ", n, " jokes....................")
+	var num_jokes int
+	var joke_type_int int
+	jkmap := map[int]string{
+		1: "general",
+		2: "programming",
+		3: "Pun",
+		4: "Spooky",
+		5: "Christmas",
+	}
+
+	// get joke type
+	fmt.Println("What kind of joke would you like?")
+	fmt.Println("Select joke category:  1) General 2) Programming 3) Pun 4) Spooky 5) Christmas ")
+	_, err := fmt.Scanf("%d", &joke_type_int)
+	joke_type, ok := jkmap[joke_type_int]
+	if err != nil || !ok {
+		fmt.Print(err.Error()) // TODO: customize error
+		os.Exit(1)
+	}
+
+	// get joke num
+	fmt.Printf("You've select: %s\n", joke_type)
+	fmt.Printf("Now, how many %s jokes would you like?\n", joke_type)
+	_, err = fmt.Scanf("%d", &num_jokes)
 	if err != nil {
 		fmt.Print(err.Error())
 		os.Exit(1)
@@ -24,14 +44,13 @@ func main() {
 	
 	// api := jokes.JokeResultSite2{}
 	// // todo: change this into an array
-
 	// ch := make(chan jokes.JokeResult)
 	// go api.GetARandomJoke(ch, "Christmas")
 	// res := <- ch
 	// fmt.Println(res)
 
 
-	jokes, err := GetRandomJokes(n, "Pun")
+	jokes, err := GetRandomJokes(num_jokes, joke_type)
 	if err != nil {
 		fmt.Print(err.Error())
 		os.Exit(1)
@@ -42,7 +61,6 @@ func main() {
 }
 
 
-// TODO!!!!: add a router function in the jokes module to determine which api to call....
 // get n non-repeating jokes, concurrently
 func GetRandomJokes(num_jokes int, joke_type string) ([]jokes.JokeResult, error){
 	// error checking 
