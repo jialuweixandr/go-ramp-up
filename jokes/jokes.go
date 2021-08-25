@@ -10,7 +10,7 @@ import (
 )
 
 ///////////////////////////////////////////////////////////////
-// generic interface and struct for both sides - an abstraction
+// generic interface and struct for both joke apis - an abstraction
 type JokeAPI interface {
 	GetARandomJoke(ch chan JokeResult, joke_type string)
 }
@@ -39,8 +39,8 @@ func (jkres JokeResult) Getpunchline () string {
 	return jkres.punchline
 }
 
-//////////////////////////////////////////////////////////////
-// determines which api to call
+///////////////////////////////////////////////////////////////
+// router determines which api to call
 func JokeRouter(joke_type string) (JokeAPI, error) {
 	if joke_type == "programming" || joke_type == "general" {
 		return JokeResultSite1{}, nil
@@ -51,9 +51,7 @@ func JokeRouter(joke_type string) (JokeAPI, error) {
 	}
 }
 
-
-
-//////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 // JSON structure and function for joke api 1
 type JokeResultSite1 struct {
 	Id        int    `json:"id"`
@@ -62,14 +60,11 @@ type JokeResultSite1 struct {
 	Punchline string `json:"punchline"`
 }
 
-// call joke api 1 and return
 func (jr1 JokeResultSite1) GetARandomJoke(ch chan JokeResult, joke_type string) {
-	// error checking
 	if joke_type != "programming" && joke_type != "general" {
 		ch <- JokeResult{error: errors.New("Bad joke type! Shold be programming or general")}
 	}
 
-	// call api 1
 	path := fmt.Sprintf("https://official-joke-api.appspot.com/jokes/%s/random", joke_type)
 	response, err := http.Get(path)
 	if err != nil {
@@ -84,7 +79,6 @@ func (jr1 JokeResultSite1) GetARandomJoke(ch chan JokeResult, joke_type string) 
 		os.Exit(1)
 	}
 
-	// parse json
 	var jkres1_arr []JokeResultSite1
 	json.Unmarshal(responseData, &jkres1_arr)
 	if len(jkres1_arr) == 0 {
@@ -92,7 +86,6 @@ func (jr1 JokeResultSite1) GetARandomJoke(ch chan JokeResult, joke_type string) 
 		os.Exit(1)
 	}
 
-	// prepare return value
 	var jkres JokeResult = JokeResult{}
 	jkres.id = jkres1_arr[0].Id
 	jkres.setup = jkres1_arr[0].Setup
@@ -100,7 +93,6 @@ func (jr1 JokeResultSite1) GetARandomJoke(ch chan JokeResult, joke_type string) 
 	jkres.site = 1
 	jkres.error = nil
 
-	// put result into channel
 	ch <- jkres
 }
 
@@ -114,14 +106,11 @@ type JokeResultSite2 struct {
 	Delivery string `json:"delivery"`
 }
 
-// call joke api 2 and return
 func (jr2 JokeResultSite2) GetARandomJoke(ch chan JokeResult, joke_type string) {
-	// error checking 
 	if joke_type != "Christmas" && joke_type != "Pun" && joke_type != "Spooky" {
 		ch <- JokeResult{error: errors.New("Bad joke type! Shold be programming or general")}
 	}
 
-	// call api2
 	path := fmt.Sprintf("https://v2.jokeapi.dev/joke/%s?type=twopart", joke_type)
 	response, err := http.Get(path)
 	if err != nil {
@@ -136,19 +125,15 @@ func (jr2 JokeResultSite2) GetARandomJoke(ch chan JokeResult, joke_type string) 
 		os.Exit(1)
 	}
 
-	// parse json
 	var jkres2 JokeResultSite2
 	json.Unmarshal(responseData, &jkres2)
 
-
-	// prepare return value
 	var jkres JokeResult = JokeResult{}
 	jkres.id = jkres2.Id
 	jkres.setup = jkres2.Setup
 	jkres.punchline = jkres2.Delivery
 	jkres.site = 2
 	jkres.error = nil
-
-	// put result into channel
+	
 	ch <- jkres
 }
