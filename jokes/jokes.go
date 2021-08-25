@@ -34,13 +34,13 @@ func (jkres JokeResult) Geterror () error {
 
 //////////////////////////////////////////////////////////////
 // determines which api to call
-func JokeRouter(joke_type string) JokeAPI {
+func JokeRouter(joke_type string) (JokeAPI, error) {
 	if joke_type == "programming" || joke_type == "general" {
-		return JokeResultSite1{}
+		return JokeResultSite1{}, nil
 	} else if joke_type == "Pun" || joke_type == "Spooky" || joke_type == "Christmas" {
-		return JokeResultSite2{}
+		return JokeResultSite2{}, nil
 	} else {
-		return nil // TODO: fix this
+		return nil, errors.New("Invalid joke type!")
 	}
 }
 

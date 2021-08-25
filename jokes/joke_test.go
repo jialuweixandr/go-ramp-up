@@ -2,61 +2,67 @@ package jokes
 
 import (
 	"testing"
-	"fmt"
 )
 
-func TestGetARandomJokeType(t *testing.T) {
+func TestGetARandomJokeNormal(t *testing.T) {
 	joke_type := "programming"
+	api, err := JokeRouter(joke_type)
+	if err != nil {
+		t.Fatalf("Wrong type")
+	}
 	ch := make(chan JokeResult)
-	go GetARandomJoke(ch, joke_type) // Question: why were you blocking when I omitted "go" keyword??
+	go api.GetARandomJoke(ch, joke_type) // Question: why were you blocking when I omitted "go" keyword??
 	jkres := <- ch
-
-	if jkres.Type != joke_type ||  jkres.Error != nil {
-		t.Fatalf("Either wrong joke type or error somewhere down the line...Expected: %v, Actual: %v", joke_type, jkres.Type) // TODO
+	if jkres.error != nil {
+		t.Fatalf("Error somewhere down the line") // TODO
 	}
 }
 
 
 // TODO: maybe check the exact error text? What's this error..?
-func TestGetARandomJokeEmpty(t *testing.T) {
+func TestJokeRouterEmpty(t *testing.T) {
 	joke_type := ""
-	ch := make(chan JokeResult)
-	go GetARandomJoke(ch, joke_type) // Question: why were you blocking when I omitted "go" keyword??
-	jkres := <- ch
-
-	if jkres.Error == nil {
-		t.Fatalf("Expect error with empty joke_type string. Actual: No error.")
+	_, err := JokeRouter(joke_type)
+	if err == nil {
+		t.Fatalf("Expect error with empty joke_type string")
 	}
+
+	// ch := make(chan JokeResult)
+	// go api.GetARandomJoke(ch, joke_type) // Question: why were you blocking when I omitted "go" keyword??
+	// jkres := <- ch
+	// if jkres.error == nil {
+	// 	t.Fatalf("Expect error with empty joke_type string. Actual: No error.")
+	// }
 }
 
 
-func TestGetRandomJokes(t *testing.T) {
-	joke_type := "general"
-	num_jokes := 3
+// func TestGetRandomJokes(t *testing.T) {
+// 	joke_type := "general"
+// 	num_jokes := 3
 
-	var jkres_list, error = GetRandomJokes(num_jokes, joke_type)
+// 	var jkres_list, error = GetRandomJokes(num_jokes, joke_type)
 
-	if len(jkres_list) != num_jokes || error != nil {
-		t.Fatalf("Unexpected result length. Expected: %v, Actual: %v", len(jkres_list), num_jokes)
-	}
+// 	if len(jkres_list) != num_jokes || error != nil {
+// 		t.Fatalf("Unexpected result length. Expected: %v, Actual: %v", len(jkres_list), num_jokes)
+// 	}
 
-	for _, jkres := range jkres_list {
-		if jkres.Type != joke_type ||  jkres.Error != nil {
-			t.Fatalf("Either wrong joke type or error somewhere down the line...Expected: %v, Actual: %v", joke_type, jkres.Type) // TODO
-		}
-	}
-}
+// 	for _, jkres := range jkres_list {
+// 		if jkres.Type != joke_type ||  jkres.Error != nil {
+// 			t.Fatalf("Either wrong joke type or error somewhere down the line...Expected: %v, Actual: %v", joke_type, jkres.Type) // TODO
+// 		}
+// 	}
+// }
 
-// TODO: what would happen if joke_type is bad?
-func TestGetRandomJokesBad(t *testing.T) {
-	joke_type := "general"
-	num_jokes := -1
+// // TODO: what would happen if joke_type is bad?
+// func TestGetRandomJokesBad(t *testing.T) {
+// 	joke_type := "general"
+// 	num_jokes := -1
 
-	var _, error = GetRandomJokes(num_jokes, joke_type)
-	fmt.Println("test04: ", error)
+// 	var _, error = GetRandomJokes(num_jokes, joke_type)
+// 	fmt.Println("test04: ", error)
 
 
-	if error == nil {
-		t.Fatalf("Expect error. Actual: No error.")
-	}
-}
+// 	if error == nil {
+// 		t.Fatalf("Expect error. Actual: No error.")
+// 	}
+// }

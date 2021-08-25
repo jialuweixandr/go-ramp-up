@@ -19,7 +19,6 @@ func main() {
 	}
 
 	for {
-
 		// get joke type
 		fmt.Println("What kind of joke would you like?")
 		fmt.Println("Select joke category:  1) General 2) Programming 3) Pun 4) Spooky 5) Christmas ")
@@ -27,14 +26,10 @@ func main() {
 		_, err := fmt.Scanf("%d", &joke_type_int)
 		joke_type, ok := jkmap[joke_type_int]
 		if err != nil || !ok {
-			fmt.Print(err.Error()) // TODO: bad joke type check!
+			// fmt.Print(err.Error()) // TODO: bad joke type check!
+			fmt.Print(errors.New("Invalid joke type!"))
 			os.Exit(1)
 		}
-
-		// if joke_type != "programming" && joke_type != "general" && joke_type != "Pun" && joke_type != "Christmas" && joke_type != "Spooky"{
-		// 	return nil, errors.New("Bad joke type! Joke type should be one of followwing: programming, general, Christmas, Pun, Spooky")
-		// }
-
 
 		// get joke num
 		fmt.Printf("You've select: %s\n", joke_type)
@@ -50,7 +45,6 @@ func main() {
 			os.Exit(1)
 			// return nil, errors.New("Invalid num_jokes value!")
 		}
-
 
 
 		// api := jokes.JokeResultSite2{}
@@ -80,8 +74,12 @@ func GetRandomJokes(num_jokes int, joke_type string) ([]jokes.JokeResult, error)
 	c := cache.NewCache() // tracks existing ids
 	jkres_list := make([]jokes.JokeResult, num_jokes) // return value
 	
-	api := jokes.JokeRouter(joke_type) // find correct struct to call based on joke_type
-
+	// get the underlying struct correspond to joke_type
+	api, err := jokes.JokeRouter(joke_type)
+	if err != nil{
+		fmt.Print(err.Error())
+		os.Exit(1)
+	}
 
 	cnt := 0
 	for {
