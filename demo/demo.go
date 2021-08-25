@@ -55,12 +55,12 @@ func main() {
 		// fmt.Println(res)
 
 
-		jokes, err := GetRandomJokes(num_jokes, joke_type)
+		err = GetRandomJokes(num_jokes, joke_type)
 		if err != nil {
 			fmt.Print(err.Error())
 			os.Exit(1)
 		}
-		fmt.Println(jokes)
+		//fmt.Println(jokes)
 
 	}
 
@@ -69,7 +69,7 @@ func main() {
 
 
 // get n non-repeating jokes, concurrently
-func GetRandomJokes(num_jokes int, joke_type string) ([]jokes.JokeResult, error){
+func GetRandomJokes(num_jokes int, joke_type string) (error){
 	ch := make(chan jokes.JokeResult, num_jokes)
 	c := cache.NewCache() // tracks existing ids
 	jkres_list := make([]jokes.JokeResult, num_jokes) // return value
@@ -90,22 +90,21 @@ func GetRandomJokes(num_jokes int, joke_type string) ([]jokes.JokeResult, error)
 		go api.GetARandomJoke(ch, joke_type)
 		jkres := <-ch
 		if jkres.Geterror() != nil {
-			fmt.Print(jkres.Geterror().Error())
-			os.Exit(1)
+			return jkres.Geterror()
 		}
 
 		// check duplicate
 		if c.CheckVisited((jkres.Getid())) {
-			fmt.Println("old joke... fetching you a new one")
+			//fmt.Println("old joke... fetching you a new one")
 			continue
 		} else {
-			fmt.Println("Found a joke for you!")
+			//fmt.Println("Found a joke for you!")
 			jkres_list[cnt] = jkres
-			// fmt.Println((cnt))
-			// fmt.Println("	Setup: ", jkres_list[cnt].Setup)
-			// fmt.Println("	Punchline: ", jkres_list[cnt].Punchline)
+			fmt.Println((cnt))
+			fmt.Println("	Setup: ", jkres_list[cnt].Getsetup())
+			fmt.Println("	Punchline: ", jkres_list[cnt].Getpunchline())
 			cnt += 1
 		}
 	}
-	return jkres_list, nil
+	return nil
 }

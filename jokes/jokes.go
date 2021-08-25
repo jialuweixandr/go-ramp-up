@@ -31,6 +31,13 @@ func (jkres JokeResult) Geterror () error {
 	return jkres.error
 }
 
+func (jkres JokeResult) Getsetup () string {
+	return jkres.setup
+}
+
+func (jkres JokeResult) Getpunchline () string {
+	return jkres.punchline
+}
 
 //////////////////////////////////////////////////////////////
 // determines which api to call
