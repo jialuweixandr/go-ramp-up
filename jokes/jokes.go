@@ -7,7 +7,17 @@ import (
 	"net/http"
 	"os"
 	"errors"
+	"strings"
 )
+
+
+var Joke_types = map[int]string{
+	1: "General",
+	2: "Programming",
+	3: "Pun",
+	4: "Spooky",
+	5: "Christmas",
+}
 
 ///////////////////////////////////////////////////////////////
 // generic interface and struct for both joke apis - an abstraction
@@ -42,9 +52,9 @@ func (jkres JokeResult) Getpunchline () string {
 ///////////////////////////////////////////////////////////////
 // router determines which api to call
 func JokeRouter(joke_type string) (JokeAPI, error) {
-	if joke_type == "programming" || joke_type == "general" {
+	if joke_type == Joke_types[1] || joke_type == Joke_types[2] {
 		return JokeResultSite1{}, nil
-	} else if joke_type == "Pun" || joke_type == "Spooky" || joke_type == "Christmas" {
+	} else if joke_type == Joke_types[3] || joke_type == Joke_types[4] || joke_type == Joke_types[5] {
 		return JokeResultSite2{}, nil
 	} else {
 		return nil, errors.New("Invalid joke type!")
@@ -61,11 +71,11 @@ type JokeResultSite1 struct {
 }
 
 func (jr1 JokeResultSite1) GetARandomJoke(ch chan JokeResult, joke_type string) {
-	if joke_type != "programming" && joke_type != "general" {
+	if joke_type != Joke_types[1] && joke_type != Joke_types[2] {
 		ch <- JokeResult{error: errors.New("Bad joke type! Shold be programming or general")}
 	}
 
-	path := fmt.Sprintf("https://official-joke-api.appspot.com/jokes/%s/random", joke_type)
+	path := fmt.Sprintf("https://official-joke-api.appspot.com/jokes/%s/random", strings.ToLower(joke_type))
 	response, err := http.Get(path)
 	if err != nil {
 		ch <- JokeResult{error: err}
@@ -101,13 +111,13 @@ func (jr1 JokeResultSite1) GetARandomJoke(ch chan JokeResult, joke_type string) 
 //JSON structure and function for joke api 2
 type JokeResultSite2 struct {
 	Category string `json:"category"`
-	Id 		int `json:"id"`
-	Setup     string `json:"setup"`
+	Id int `json:"id"`
+	Setup string `json:"setup"`
 	Delivery string `json:"delivery"`
 }
 
 func (jr2 JokeResultSite2) GetARandomJoke(ch chan JokeResult, joke_type string) {
-	if joke_type != "Christmas" && joke_type != "Pun" && joke_type != "Spooky" {
+	if joke_type != Joke_types[3] && joke_type != Joke_types[4] && joke_type != Joke_types[5] {
 		ch <- JokeResult{error: errors.New("Bad joke type! Shold be programming or general")}
 	}
 
@@ -134,6 +144,6 @@ func (jr2 JokeResultSite2) GetARandomJoke(ch chan JokeResult, joke_type string) 
 	jkres.punchline = jkres2.Delivery
 	jkres.site = 2
 	jkres.error = nil
-	
+
 	ch <- jkres
 }

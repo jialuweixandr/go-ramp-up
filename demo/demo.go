@@ -9,45 +9,53 @@ import (
 )
 
 func main() {
-	jokemap := map[int]string{
-		1: "general",
-		2: "programming",
-		3: "Pun",
-		4: "Spooky",
-		5: "Christmas",
-	}
-
 	for {
-		fmt.Println("What kind of joke would you like?")
-		fmt.Println("Select joke category:  1) General 2) Programming 3) Pun 4) Spooky 5) Christmas ")
-		var n int
-		_, err := fmt.Scanf("%d", &n)
-		joke_type, ok := jokemap[n]
-		if err != nil || !ok {
-			fmt.Print(errors.New("Invalid joke type!"))
-			os.Exit(1)
-		}
+		joke_type := getJokeType()
 
 		fmt.Printf("You've select: %s\n", joke_type)
 		fmt.Printf("Now, how many %s jokes would you like?\n", joke_type)
-		var num_jokes int
-		_, err = fmt.Scanf("%d", &num_jokes)
-		if err != nil {
-			fmt.Print(err.Error())
-			os.Exit(1)
-		}
-		if num_jokes < 0 {
-			fmt.Print(errors.New("Invalid num_jokes value!"))
-			os.Exit(1)
-		}
+
+		num_jokes := getJokeNum()
 
 		// get jokes
-		err = GetRandomJokes(num_jokes, joke_type)
+		err := GetRandomJokes(num_jokes, joke_type)
 		if err != nil {
 			fmt.Print(err.Error())
 			os.Exit(1)
 		}
 	}
+}
+
+func getJokeType() string {
+	fmt.Println("What kind of joke would you like?")
+	fmt.Print("Select joke category: ")
+	for i := 1; i<6; i++ {
+		fmt.Printf(" %v %s", i, jokes.Joke_types[i])
+	}
+	fmt.Print("\n")
+	var n int
+	_, err := fmt.Scanf("%d", &n)
+	joke_type, ok := jokes.Joke_types[n]
+	if err != nil || !ok {
+		fmt.Println(errors.New("Invalid joke type!"))
+		os.Exit(1)
+	}
+	return joke_type
+}
+
+
+func getJokeNum() int {
+	var num_jokes int
+	_, err := fmt.Scanf("%d", &num_jokes)
+	if err != nil {
+		fmt.Print(err.Error())
+		os.Exit(1)
+	}
+	if num_jokes < 0 {
+		fmt.Print(errors.New("Invalid num_jokes value!"))
+		os.Exit(1)
+	}
+	return num_jokes
 }
 
 func GetRandomJokes(num_jokes int, joke_type string) (error){

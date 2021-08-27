@@ -5,7 +5,7 @@ import (
 )
 
 func TestGetARandomJokeNormal(t *testing.T) {
-	joke_type := "programming"
+	joke_type := "Programming"
 	api, err := JokeRouter(joke_type)
 	if err != nil {
 		t.Fatalf("Invalid joke type!")
