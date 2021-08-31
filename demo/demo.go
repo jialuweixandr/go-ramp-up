@@ -46,8 +46,7 @@ func getJokeType() string {
 
 func getJokeNum() int {
 	var num_jokes int
-	_, err := fmt.Scanf("%d", &num_jokes)
-	if err != nil {
+	if _, err := fmt.Scanf("%d", &num_jokes); err != nil {
 		fmt.Print(err.Error())
 		os.Exit(1)
 	}
@@ -78,17 +77,17 @@ func GetRandomJokes(num_jokes int, joke_type string) (error){
 
 		go api.GetARandomJoke(ch, joke_type)
 		jkres := <-ch
-		if jkres.Geterror() != nil {
-			return jkres.Geterror()
+		if jkres.GetError() != nil {
+			return jkres.GetError()
 		}
 
-		if c.CheckVisited((jkres.Getid())) {
+		if c.CheckVisited((jkres.GetId())) {
 			continue
 		} else {
 			jkres_list[cnt] = jkres
 			fmt.Println((cnt+1))
-			fmt.Println("	Setup: ", jkres_list[cnt].Getsetup())
-			fmt.Println("	Punchline: ", jkres_list[cnt].Getpunchline())
+			fmt.Println("	Setup: ", jkres_list[cnt].GetSetup())
+			fmt.Println("	Punchline: ", jkres_list[cnt].GetPunchline())
 			cnt += 1
 		}
 	}

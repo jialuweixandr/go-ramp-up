@@ -3,7 +3,6 @@ package jokes
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"errors"
@@ -33,19 +32,19 @@ type JokeResult struct {
 	error error
 }
 
-func (jkres JokeResult) Getid () int {
+func (jkres JokeResult) GetId () int {
 	return jkres.id
 }
 
-func (jkres JokeResult) Geterror () error {
+func (jkres JokeResult) GetError () error {
 	return jkres.error
 }
 
-func (jkres JokeResult) Getsetup () string {
+func (jkres JokeResult) GetSetup () string {
 	return jkres.setup
 }
 
-func (jkres JokeResult) Getpunchline () string {
+func (jkres JokeResult) GetPunchline () string {
 	return jkres.punchline
 }
 
@@ -83,18 +82,13 @@ func (jr1 JokeResultSite1) GetARandomJoke(ch chan JokeResult, joke_type string) 
 	}
 
 	// parse response
-	responseData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
+	var jkres1_arr []JokeResultSite1
+	dec := json.NewDecoder(response.Body)
+	if err = dec.Decode(&jkres1_arr); err != nil {
 		ch <- JokeResult{error: err}
-		os.Exit(1)
+	 	os.Exit(1)
 	}
 
-	var jkres1_arr []JokeResultSite1
-	json.Unmarshal(responseData, &jkres1_arr)
-	if len(jkres1_arr) == 0 {
-		ch <- JokeResult{error: errors.New("bad array length 0")}
-		os.Exit(1)
-	}
 
 	var jkres JokeResult = JokeResult{}
 	jkres.id = jkres1_arr[0].Id
@@ -129,14 +123,12 @@ func (jr2 JokeResultSite2) GetARandomJoke(ch chan JokeResult, joke_type string) 
 	}
 
 	// parse response
-	responseData, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		ch <- JokeResult{error: err}
-		os.Exit(1)
-	}
-
 	var jkres2 JokeResultSite2
-	json.Unmarshal(responseData, &jkres2)
+	dec := json.NewDecoder(response.Body)
+	if err = dec.Decode(&jkres2); err != nil {
+		ch <- JokeResult{error: err}
+	 	os.Exit(1)
+	}
 
 	var jkres JokeResult = JokeResult{}
 	jkres.id = jkres2.Id

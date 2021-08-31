@@ -16,8 +16,7 @@ func NewCache() Cache {
 func (c *Cache) CheckVisited(id int) bool {
 	c.mux.Lock()
 	defer c.mux.Unlock()
-	_, ok := c.dict[id]
-	if ok == false {
+	if _, ok := c.dict[id]; !ok {
 		c.dict[id] = true
 		return false
 	}
